@@ -8,23 +8,36 @@ import {
     Segmented,
     Col,
     Row,
-    Select
+    Select,
+    message
 } from 'antd'
 
 import { BgColorsOutlined, BorderOuterOutlined } from '@ant-design/icons'
 
 let CurrentStateContext = createContext(null)
 let CurrentDesignContext = createContext(null)
+let MessageApiContext = createContext(null)
+
 let cellWidth = 100
 let cellHeight = 40
 let flexGap = 12
 let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-function OverlayBox() {
+async function copyToClipboard(text, messageApi) {
+    await navigator.clipboard.writeText(text);
+    messageApi.info(`Copy ${text}`);
+}
+
+function OverlayBox({ clipboardContent }) {
+    let messageApi = useContext(MessageApiContext)
     return (
         <>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%", position: "absolute", zIndex: 1 }}>
                 <Card
+                    onClick={() => {
+                        console.log(clipboardContent)
+                        copyToClipboard(clipboardContent['fillColor'], messageApi)
+                    }}
                     className='overlay-card'
                     hoverable
                     variant='borderless'
@@ -63,7 +76,7 @@ function OverlayBox() {
     )
 }
 
-function OverlayText() {
+function OverlayText({ clipboardContent }) {
     return (
         <>
             <Card
@@ -92,8 +105,6 @@ function Controller() {
     let [currentDesign, setCurrentDesign] = useContext(CurrentDesignContext)
     let textChoices1 = [
         { "value": 'auto', "label": 'text auto' },
-        { "value": 'black', "label": 'text black' },
-        { "value": 'white', "label": 'text white' },
     ]
     let textChoices2 = Array.from({ length: currentState[currentDesign]['colors'][0].length }, (_, i) => ({ "value": i, "label": `text ${i}` }));
     let textChoices = [...textChoices1, ...textChoices2]
@@ -145,12 +156,10 @@ function DemoRow({ demoType, OverlayComp }) {
                         let fillColor = hue[currentState[currentDesign]["fill"]]
                         let bordColor = hue[currentState[currentDesign]["border"]]
                         let cardVariant = "borderless"
-                        let textColor = "black"
+                        let textColor = "auto"
                         if (textValue == 'auto') {
                             textColor = `contrast-color(${fillColor})`
-                        }
-                        else if (typeof textValue == "string") {
-                            textColor = textValue
+                            console.log("textColor", textColor)
                         }
                         else {
                             textColor = hue[textValue]
@@ -159,6 +168,11 @@ function DemoRow({ demoType, OverlayComp }) {
                             cardStyle['backgroundColor'] = fillColor
                             cardStyle['borderColor'] = bordColor
                             cardVariant = "outlined"
+                        }
+                        let clipboardContent = {
+                            "fillColor": fillColor,
+                            "bordColor": bordColor,
+                            "textColor": textValue == 'auto' ? "#000000" : textColor
                         }
                         return (
                             <Card
@@ -176,7 +190,7 @@ function DemoRow({ demoType, OverlayComp }) {
                                 style={cardStyle}
                             >
                                 <Typography.Text style={{ color: textColor }}>color {alphabet[hueIdx]}</Typography.Text>
-                                <OverlayComp />
+                                <OverlayComp clipboardContent={clipboardContent} />
                             </Card>
                         )
                     })
@@ -259,7 +273,7 @@ function ColorPalette() {
 
 function AppLayout() {
     let [currentState, setCurrentState] = useContext(CurrentStateContext)
-    let [currentDesign, setCurrentDesign] = useContext(CurrentStateContext)
+    let [currentDesign, setCurrentDesign] = useContext(CurrentDesignContext)
     const gridStyle = {
         width: '25%',
         textAlign: 'center',
@@ -292,6 +306,7 @@ function AppLayout() {
 function App() {
     let [currentState, setCurrentState] = useState(null)
     let [currentDesign, setCurrentDesign] = useState(null)
+    let [messageApi, contextHolder] = message.useMessage();
     useEffect(() => {
         async function loadPalettes() {
             let jsonFile = await fetch("/color-palettes.json")
@@ -303,11 +318,14 @@ function App() {
     }, [])
     return (
         currentState ?
-            <CurrentStateContext.Provider value={[currentState, setCurrentState]}>
-                <CurrentDesignContext.Provider value={[currentDesign, setCurrentDesign]}>
-                    <AppLayout />
-                </CurrentDesignContext.Provider>
-            </CurrentStateContext.Provider>
+            <MessageApiContext.Provider value={messageApi}>
+                {contextHolder}
+                <CurrentStateContext.Provider value={[currentState, setCurrentState]}>
+                    <CurrentDesignContext.Provider value={[currentDesign, setCurrentDesign]}>
+                        <AppLayout />
+                    </CurrentDesignContext.Provider>
+                </CurrentStateContext.Provider>
+            </MessageApiContext.Provider>
             : <></>
     )
 }
