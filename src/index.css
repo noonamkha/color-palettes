@@ -27,9 +27,11 @@ body,
     overflow: hidden;
 } */
 
-.ant-card-grid:not(:hover) {
+.ant-card-grid:not(:hover),
+.overlay-card:not(:hover) {
     box-shadow: none;
 }
+
 
 /* #root>.ant-layout {
   height: 100%

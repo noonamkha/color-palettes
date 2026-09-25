@@ -20,10 +20,54 @@ let cellHeight = 40
 let flexGap = 12
 let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-function OverLayBox() {
+function OverlayBox() {
+    return (
+        <>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%", position: "absolute", zIndex: 1 }}>
+                <Card
+                    className='overlay-card'
+                    hoverable
+                    variant='borderless'
+                    styles={{
+                        body: {
+                            padding: 0,
+                        }
+                    }}
+                    style={{
+                        height: "100%",
+                        width: "50%",
+                        backgroundColor: "transparent",
+                        borderRadius: "8px 0 0 8px"
+                    }}
+                >
+                </Card>
+                <Card
+                    className='overlay-card'
+                    hoverable
+                    variant='borderless'
+                    styles={{
+                        body: {
+                            padding: 0
+                        }
+                    }}
+                    style={{
+                        height: "100%",
+                        width: "50%",
+                        backgroundColor: "transparent",
+                        borderRadius: "0 8px 8px 0"
+                    }}
+                >
+                </Card>
+            </div>
+        </>
+    )
+}
+
+function OverlayText() {
     return (
         <>
             <Card
+                className='overlay-card'
                 hoverable
                 variant='borderless'
                 styles={{
@@ -32,30 +76,10 @@ function OverLayBox() {
                     }
                 }}
                 style={{
-                    border: "0px",
+                    position: "absolute", zIndex: 1,
                     height: "100%",
-                    width: "50%",
-                    backgroundColor: "transparent",
-                    border: "0px",
-                    boxShadow: "none"
-                }}
-            >
-            </Card>
-            <Card
-                hoverable
-                variant='borderless'
-                styles={{
-                    body: {
-                        padding: 0
-                    }
-                }}
-                style={{
-                    border: "0px",
-                    height: "100%",
-                    width: "50%",
-                    backgroundColor: "transparent",
-                    border: "0px",
-                    boxShadow: "none"
+                    width: "100%",
+                    backgroundColor: "transparent"
                 }}
             >
             </Card>
@@ -67,11 +91,11 @@ function Controller() {
     let [currentState, setCurrentState] = useContext(CurrentStateContext)
     let [currentDesign, setCurrentDesign] = useContext(CurrentDesignContext)
     let textChoices1 = [
-        { "value": 'auto', "label": 'auto' },
-        { "value": 'black', "label": 'black' },
-        { "value": 'white', "label": 'white' },
+        { "value": 'auto', "label": 'text auto' },
+        { "value": 'black', "label": 'text black' },
+        { "value": 'white', "label": 'text white' },
     ]
-    let textChoices2 = Array.from({ length: currentState[currentDesign]['colors'][0].length }, (_, i) => ({ "value": i, "label": `tone ${i}` }));
+    let textChoices2 = Array.from({ length: currentState[currentDesign]['colors'][0].length }, (_, i) => ({ "value": i, "label": `text ${i}` }));
     let textChoices = [...textChoices1, ...textChoices2]
     function changeTextChoice(val) {
         console.log("val", val)
@@ -102,7 +126,7 @@ function Controller() {
     )
 }
 
-function DemoRow({ demoType }) {
+function DemoRow({ demoType, OverlayComp }) {
     let [currentState, setCurrentState] = useContext(CurrentStateContext)
     let [currentDesign, setCurrentDesign] = useContext(CurrentDesignContext)
     return (
@@ -145,12 +169,14 @@ function DemoRow({ demoType }) {
                                         padding: 0,
                                         width: "100%",
                                         height: "100%",
-                                        display: "flex", alignItems: "center", justifyContent: "center"
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        position: "relative"
                                     }
                                 }}
                                 style={cardStyle}
                             >
                                 <Typography.Text style={{ color: textColor }}>color {alphabet[hueIdx]}</Typography.Text>
+                                <OverlayComp />
                             </Card>
                         )
                     })
@@ -161,7 +187,7 @@ function DemoRow({ demoType }) {
     )
 }
 
-function TypeSelector({ typeColor, iconElement }) {
+function TypeSelector({ typeColor, IconComp }) {
     let [currentState, setCurrentState] = useContext(CurrentStateContext)
     let [currentDesign, setCurrentDesign] = useContext(CurrentDesignContext)
 
@@ -189,7 +215,7 @@ function TypeSelector({ typeColor, iconElement }) {
                 options={
                     currentState[currentDesign]['colors'][0].map((item, idx) => {
                         let label = typeColor == "fill" ? idx : alphabet[idx]
-                        return { "value": idx, "label": `${typeColor} ${idx}`, "icon": iconElement }
+                        return { "value": idx, "label": `${typeColor} ${idx}`, "icon": IconComp }
                     })
                 }
             />
@@ -246,18 +272,18 @@ function AppLayout() {
             </div>
             <div className='tableHeader' style={{ display: "flex", gap: flexGap, marginBottom: flexGap }}>
                 <div style={{ minWidth: cellWidth, height: cellHeight }}></div>
-                <DemoRow demoType={'text'} />
+                <DemoRow demoType={'text'} OverlayComp={OverlayText} />
             </div>
             <div className='tableBody' style={{ display: "flex", gap: flexGap, marginBottom: flexGap }}>
                 {/* <div style={{ minWidth: cellWidth }}> */}
-                <TypeSelector typeColor={"fill"} iconElement={<BgColorsOutlined />} />
+                <TypeSelector typeColor={"fill"} IconComp={<BgColorsOutlined />} />
                 {/* </div> */}
                 <ColorPalette />
-                <TypeSelector typeColor={"border"} iconElement={<BorderOuterOutlined />} />
+                <TypeSelector typeColor={"border"} IconComp={<BorderOuterOutlined />} />
             </div>
             <div className='tableFooter' style={{ display: "flex", gap: flexGap, marginBottom: flexGap }}>
                 <div style={{ minWidth: cellWidth, height: cellHeight }}></div>
-                <DemoRow demoType={'box'} />
+                <DemoRow demoType={'box'} OverlayComp={OverlayBox} />
             </div>
         </>
     )
