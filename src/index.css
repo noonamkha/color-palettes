@@ -1,23 +1,37 @@
+@font-face {
+    font-family: 'Noto Sans';
+    src: url('./assets/fonts/NotoSans-VariableFont_wdth,wght.ttf');
+}
+
+@font-face {
+    font-family: 'Noto Sans Mono';
+    src: url('./assets/fonts/NotoSansMono-VariableFont_wdth,wght.ttf');
+}
+
 ::-webkit-scrollbar-track {
     /* -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
     border-radius: 10px;
     background-color: transparent;
+    border-color: transparent;
 }
 
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 12px;
+    height: 12px;
     background-color: transparent;
+    border-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 1px rgba(0, 0, 0, .3);
+    /* -webkit-box-shadow: inset 0 0 1px rgba(0, 0, 0, .3); */
     background-color: rgb(200, 200, 200);
+    -webkit-box-shadow: inset transparent;
+    border-color: transparent;
 }
 
 body {
     margin: 12px;
-    /* overflow: hidden; */
 }
 
 /* html,
@@ -27,8 +41,7 @@ body,
     overflow: hidden;
 } */
 
-.ant-card-grid:not(:hover),
-.overlay-card:not(:hover) {
+.no-shadow:not(:hover) {
     box-shadow: none;
 }
 
